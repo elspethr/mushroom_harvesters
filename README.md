@@ -16,3 +16,4 @@ Multitensor was developed by Caterina de Bacco and colleagues at the MPI for Int
 
 ## Data availability
 
+The dataset contains potentially sensitive information on kinship and household location. Requests for data access should be directed to: mtbrown@umd.edu
