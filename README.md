@@ -14,7 +14,7 @@ Code for paper "Market integration and cooperative resource harvesting"
 
 Multitensor was developed by Caterina de Bacco and colleagues at the MPI for Intelligent Systems. Details of the multitensor algorithm and instructions for installation can be found at https://github.com/MPI-IS/multitensor.
 
-My notes on configuring the virtual environment for multitensor are in the file **mt_venc_config.txt** 
+My notes on configuring the virtual environment for multitensor are in the file **mt_venv_config.txt** 
 
 ## Data availability
 
