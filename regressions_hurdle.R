@@ -87,7 +87,7 @@ model{
     p[i] = ai[id[i],1] + b[year[i],1] + b[year[i],2] * deg[i];
     contract[i] ~ bernoulli_logit(p[i]);
     if (contract[i]==1) {
-      harv[i] ~ poisson(exp(ai[id[i],2] + b[year[i],3] + b[year[i],4]*deg[i]));
+      coop[i] ~ bernoulli_logit(ai[id[i], 2] + b[year[i], 3] + b[year[i], 4] * deg[i]);
     }
   }
 }
