@@ -8,8 +8,8 @@ setwd("[current dir]") #wherever you need to be
 
 ### load libraries and data ###
 
-source("Yunnan_kinship_build.R")
-source("Yunnan_networks_build.R")
+source("yunnan_kinship_build.R")
+source("yunnan_networks_build.R")
 
 #libraries loaded in source files: plyr, kinship2, tidyverse, reshape2, network
 library(rethinking) #requires rstan
@@ -20,14 +20,19 @@ keep <- c("kindat", "kinnet", "closekinnet", "cousinsnet", "clannet",
           "ss2014net", "ss2015net", "ss2015net_sub")
 rm(list=setdiff(ls(), keep))
 
-### simple regression models ###
+### regression model ###
+
+contract <- as.numeric(c(harv2014%v%"contract", 
+                         harv2015%v%"contract"))
+#cleanse those pesky loops
+harv2014 <- as.network(as.sociomatrix(harv2014), loops=FALSE, directed=FALSE)
+harv2015 <- as.network(as.sociomatrix(harv2015), loops=FALSE, directed=FALSE)
 
 dat <-  list(deg = c(degree(ss2014net, cmode = "freeman"), 
                      degree(ss2015net, cmode = "freeman")),
-             contract = as.numeric(c(harv2014%v%"contract", 
-                                     harv2015%v%"contract")),
-             harv = c(degree(harv2014,cmode="indegree"), 
-                     degree(harv2015,cmode="indegree")),
+             contract = contract,
+             harv = c(degree(harv2014, gmode="graph"), 
+                      degree(harv2015, gmode="graph")),
              id = c(1:73, 1:73) + 0L, 
              year= c(rep(1, 73), rep(2, 73)) + 0L, 
              deg_new = rep(c(0:14), 2), 
@@ -37,7 +42,6 @@ dat$coop <- as.numeric(dat$harv>0)
 
 
 modelcode <- "data{
-  int harv[146];
   int<lower=0,upper=1> coop[146];
   int<lower=0,upper=1> contract[146];
   int deg[146];
@@ -54,8 +58,6 @@ parameters{
    cholesky_factor_corr[2] L_Rho_a;
   
   vector[4] b_raw[2];
-  // vector[4] mu_b; // for fully de-centered version, not used
-  // vector<lower=0>[4] sigma_b;
   cholesky_factor_corr[4] L_b;
 }
 transformed parameters{
@@ -65,7 +67,6 @@ transformed parameters{
     ai[k] = mu_a + sigma_a .*(L_Rho_a*a_raw[k]);
   }
   for (j in 1:2) {
-    // b[j] = mu_b + sigma_b .* (L_b*b_raw[j]); 
     b[j] = L_b*b_raw[j];
   }
 }
@@ -100,9 +101,9 @@ generated quantities {
   }
 }"
 
-harvm5 <- stan(model_code = modelcode, data = dat, 
+harvm5 <- stan(model_code = modelcode, data = dat, seed=3477,
                control=list(adapt_delta=0.99, max_treedepth=15), 
-               iter=4000)
+               iter=4000, chains=3)
 
 #table 3
 round(precis(harvm5, depth=3)[c(325, 329, 326, 330, 327, 331, 328, 332),], 3)  
@@ -139,20 +140,20 @@ contractpreds2015 <- precis(harvm5, depth=3)[348:362,]
 cooppreds2014 <- precis(harvm5, depth=3)[363:377,]
 cooppreds2015 <- precis(harvm5, depth=3)[378:392,]
 
-pdf("models/plot_harvm5.pdf",height=3, width=7, pointsize=9)
-par(mar=c(3,4,3,3), mfrow=c(1,2))
+png("Figure4.png", height=3.5, width=7.5, units="cm", res=300, pointsize=4)
+par(mar=c(3,4,3,1), mfrow=c(1,2))
 for (year in c("2014", "2015")) {
   contractpreds <- get(paste0("contractpreds", year))
   cooppreds <- get(paste0("cooppreds", year))
-  plot(1:15, inv_logit(contractpreds$mean), ylim=c(-0.1, 1.1),
+  plot(1:15, inv_logit(contractpreds$mean), ylim=c(-0.05, 1.05),
        ylab="Prob. harvest", xlab="Support Ties", main=year, type="n")
   if (year == "2014") {
     points(jitter(dat$deg[1:73], 0.1), jitter(dat$contract[1:73], 0.1), 
-           pch=19, col=ifelse(dat$coop[1:73]+dat$contract[1:73]==2, c3, c1))
+           pch=16, cex=1.3, col=ifelse(dat$coop[1:73]+dat$contract[1:73]==2, c3, c1))
   }
   if (year == "2015") {
-    points(jitter(dat$deg[74:146], 0.1), jitter(dat$contract[74:146], 0.1), pch=19, 
-           col=ifelse(dat$coop[74:146]+dat$contract[74:146]==2, c3, c1))
+    points(jitter(dat$deg[74:146], 0.1), jitter(dat$contract[74:146], 0.1), pch=16, 
+           cex=1.3, col=ifelse(dat$coop[74:146]+dat$contract[74:146]==2, c3, c1))
   }
   shade(rbind(inv_logit(contractpreds$`5.5%`), inv_logit(contractpreds$`94.5%`)), 1:15, col=c2b)
   lines(1:15, inv_logit(contractpreds$mean), col=c2, lwd=2, lty=1)

@@ -50,7 +50,7 @@ temp <- unique(cbind(c(harvdat2016$ego_hh, harvdat2016$partner_hh),
 harv2016%v%"contract_id" <- temp[match(1:75, temp[,1]), 2]
 harv2016 <- delete.vertices(harv2016, vid=c(64, 65))
 harv2016%v%"contract" <- c(1:63, 66:75) %in% c(harvdat2016$ego_hh, harvdat2016$partner_hh)
-
+#note: beware the harv nets contain self-loops for lone harvesters! (Easier to keep in contracters)
 
 ### social support data ###
 
@@ -109,14 +109,17 @@ ss2015net_sub <- network.edgelist(socedges2015_sub, ss2015net_sub)
 
 ### distances ###
 
-#distance <- read.csv("distancesbtwHH.csv")
-#distance<-distance %>% mutate(NeighborYN=ifelse(DistancebtwHHpaths_m > 250, "N","Y"))
 distance <- read.csv("directdistanceHH.csv")
 distance <- distance %>% mutate(NeighborYN=ifelse(directdistanceHH_m > 250, 0, 1))
 distance <- rename(distance, OriginID=INPUT_FID)
 distance <- rename(distance, DestinationID=NEAR_FID)
+
+neighbornet <- network.initialize(75, directed=FALSE)
+neighbornet%v%"vertex.names" <- 1:75
+neighbornet <- network.edgelist(distance[,c(2:3,5)], neighbornet, ignore.eval=FALSE, names.eval=c("neighbor"))
+neighbornet <- delete.vertices(neighbornet, vid=c(64, 65))
+
 distnet <- network.initialize(75, directed=FALSE)
 distnet%v%"vertex.names" <- 1:75
-distnet <- network.edgelist(distance[,c(2:3,5)], distnet, ignore.eval=FALSE, names.eval=c("neighbor"))
+distnet <- network.edgelist(distance[,c(2:3,4)], distnet, ignore.eval=FALSE, names.eval=c("weight"))
 distnet <- delete.vertices(distnet, vid=c(64, 65))
-

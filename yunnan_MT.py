@@ -3,7 +3,7 @@
 import sys, os
 
 #still don't know why I need this :/
-sys.path.append("[path to multitensor build]")
+sys.path.append('/Users/elspethready/repos/multitensor/build')
 
 import multitensor
 import pandas as pd
@@ -72,13 +72,13 @@ def main():
 
   #network info
   undirected = True
-  in_folder = '[folder for input data]'
-  out_folder = '[folder for dropping outputs]'
+  in_folder = '../yunnan_data/input/'
+  out_folder = '../yunnan_data/output/'
   years = ["2014", "2015"]
-  assortative = True #note running disassortative doesn't change the results in this case
+  assortative = True
 
   #mt and cv params
-  rseed = 6
+  rseed = 78953
   directed = np.logical_not(undirected)
 
   #what layer/group combinations to run
@@ -101,33 +101,35 @@ def main():
 
   ### loop for layer interdependence/link prediction ###
 
- for year in years:
+  for year in years:
    #arrange data
    label = '_harv'
    adj_name = 'yunnan_networks_' + year + label + '.dat'
    A, data0, nodes, nodeName2Id, nodeId2Name = tl.import_data(in_folder, adj_name=adj_name, sep='\s+', header=None,
                                                                 ego=0, alter=1, undirected=undirected, verbose=0)
-   n = -1
-   for ly_idx in ly_combs:
-     n +=1
-     print(comb_name[n])
-     #prep test/train split
-     adjacency_file, data, idxG, testG, samples_test, samples_train = prep_test_train(data0, ly_idx, nodeId2Name, rseed=rseed)
-     #run multitensor for n groups
-     auc_array = np.empty((0,3), float)
-     for K in range(min_grp, (max_grp+1)): 
-       u, w, auc_train, auc_test = run_mt_with_cv(adjacency_file, data, idxG, testG, K, samples_train,
-                                                    samples_test, rseed=rseed, directed=directed, assortative=assortative)
-       auc_array = np.append(auc_array, np.array([[K, auc_train, auc_test]]), axis=0)
-       u_norm = normalize_membership(u)
-       fname1 = out_folder + year +"/cv_membership_" + comb_name[n] + "_%s.txt" % K
-       with open(fname1, 'w') as f:
-         for node in u_norm:
-           for prob in node:
-             f.write("%s," % prob)
-           f.write("\n")
-     fname2 = out_folder + year +"/cv_auc_" + comb_name[n] + ".txt"
-     np.savetxt(fname2, auc_array, delimiter=",")
+   for nf in [2,3,4,5,6]:
+     n = -1
+     for ly_idx in ly_combs:
+       n +=1
+       print(comb_name[n])
+       #prep test/train split
+       adjacency_file, data, idxG, testG, samples_test, samples_train = prep_test_train(data0, ly_idx, nodeId2Name, NFold=nf, rseed=rseed)
+       #run multitensor for n groups
+       auc_array = np.empty((0,3), float)
+       for K in range(min_grp, (max_grp+1)): 
+         u, w, auc_train, auc_test = run_mt_with_cv(adjacency_file, data, idxG, testG, K, samples_train,
+                                                      samples_test, rseed=rseed, directed=directed, assortative=assortative)
+         auc_array = np.append(auc_array, np.array([[K, auc_train, auc_test]]), axis=0)
+         u_norm = normalize_membership(u)
+         #cm = binary_assignment_communities(u, threshold=0.1)
+         fname1 = out_folder + year +"/cv_membership_" + comb_name[n] + "_%s_%sFCV.txt" % (K, nf)
+         with open(fname1, 'w') as f:
+           for node in u_norm:
+             for prob in node:
+               f.write("%s," % prob)
+             f.write("\n")
+         fname2 = out_folder + year +"/cv_auc_" + comb_name[n] + "_%sFCV.txt" % nf
+         np.savetxt(fname2, auc_array, delimiter=",")
 
              
   ### loop for straight up group membership ###
@@ -139,19 +141,21 @@ def main():
         lab = ""
       else:
         lab = "_harv"
-      adj_name = in_folder + 'yunnan_networks_' + year + lab + '.dat'
+      adj_name = in_folder + 'yunnan_networks_short' + year + lab + '.dat'
+      #adj_name = in_folder + 'yunnan_networks_harv' + year + '.dat'
       for K in range(min_grp, (max_grp+1)): 
           u0, v0, w0, report = multitensor.run(adj_name, K, seed=rseed, nof_realizations=10,
                                                assortative=assortative, max_nof_iterations=500, directed=directed,
                                                nof_convergences=2)
           fname3 = out_folder + year +"/membership" + lab + "_%s.txt" % K
+          #fname3 = out_folder + year +"/membership_harvonly" + lab + "_%s.txt" % K
           with open(fname3, 'w') as f:
             for node in u0: #note multitensor.run gives diff output than run_mt_with_cv
               for prob in node:
                 f.write("%s," % prob)
               f.write("\n")
           fname4 = out_folder + year + "/affinity" + year + lab + "_%s.txt" % K
-          with open(fname4, 'wb') as f:
+          with open(fname4, 'w') as f:
             for group in w0:
               for aff in group:
                 f.write("%s," % aff)

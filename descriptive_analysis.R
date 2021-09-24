@@ -12,15 +12,15 @@ setwd("[current dir]") #wherever you need to be
 
 ### load libraries and data ###
 
-source("Yunnan_kinship_build.R")
-source("Yunnan_networks_build.R")
+source("yunnan_kinship_build.R")
+source("yunnan_networks_build.R")
 
 #libraries loaded in source files: plyr, kinship2, tidyverse, reshape2, network
 library(RColorBrewer)
 library(viridis)
 
 #clean workspace
-keep <- c("kindat", "kinnet", "closekinnet", "cousinsnet", "clannet",
+keep <- c("kindat", "kinnet", "closekinnet", "cousinsnet", "clannet", "neighbornet"
           "distnet", "hhdat", "harvdat", "harv2014", "harv2015", 
           "harv2016", "ss2014net", "ss2015net", "ss2015net_sub")
 rm(list=setdiff(ls(), keep))
@@ -44,31 +44,31 @@ contract_col2015 <- harv2015%v%"contract_id"
 contract_col2015[is.na(contract_col2015)] <- 0
 
 #plot
-pdf("ss_harv_nets.pdf", height=3, width=6, pointsize=10)
+png("Figure2.png", height=4/2.54, width=7.5/2.54, units="in", res=300, pointsize=7)
 par(mar=c(0,0,2,0), mfrow=c(1,2))
 palette(c("white", viridis(9), magma(8)))
 plot(ss2014net, vertex.col=contract_col2014+1,
      vertex.cex=(degree(ss2014net, cmode="indegree")+1)/3, 
-     coord=layout1, vertex.border="black",
+     coord=layout1, vertex.border="black", 
      edge.col="grey50", main="2014")
 plot(harv2014, vertex.col=contract_col2014+1,
      vertex.cex=(degree(ss2014net, cmode="indegree")+1)/3, 
-     edge.col=rgb(1,0,0, alpha=0.3), 
+     edge.col=rgb(1,0,0, alpha=0.3), edge.lwd=0.05,
      coord=layout1, vertex.border="black", new=FALSE)
 plot(ss2015net_sub, vertex.col=contract_col2015+1,
      vertex.cex=(degree(ss2015net_sub, cmode="indegree")+1)/3, 
-     coord=layout2, vertex.border="black",
+     coord=layout2, vertex.border="black", 
      edge.col="grey50", main="2015")
 plot(harv2014, vertex.col=contract_col2015+1,
      vertex.cex=(degree(ss2015net_sub, cmode="indegree")+1)/3,
-     coord=layout2, vertex.border="black",
+     coord=layout2, vertex.border="black", 
      edge.col=rgb(1,0,0, alpha=0.3), new=FALSE)
 plot(harv2015, vertex.col=contract_col2015+1,
      vertex.cex=(degree(ss2015net_sub, cmode="indegree")+1)/3,
-     coord=layout2, vertex.border="black",
+     coord=layout2, vertex.border="black", 
      edge.col=rgb(0,0,1, alpha=0.3), new=FALSE)
 legend("topright", legend=c("Support tie", "2014 harvest", "2015 harvest"), 
-       col=c("grey50", "red", "blue"), lty=1, bty="n", cex=0.6)
+       col=c("grey50", "red", "blue"), lty=1, bty="n", cex=0.65)
 dev.off()
 
 # kinship #
@@ -76,24 +76,24 @@ dev.off()
 kin_layout <- network.layout.fruchtermanreingold(cousinsnet, NULL)
 clan <- hhdat$clan[which(hhdat$household_id %in% (cousinsnet%v%"vertex.names"))]
 
-pdf("kinship_nets.pdf", height=5, width=5, pointsize=10)
+png("Figure3.png", height=3.75/2.54, width=3.75/2.54, units="in", res=300, pointsize=5)
 par(mar=c(0,0,2,0), mfrow=c(1,1))
 palette(c(viridis(6), magma(6)))
-plot(cousinsnet, edge.col="grey60", edge.lwd=2, 
-     coord=kin_layout, main="Kinship network")
-plot(closekinnet, edge.col="grey30", edge.lwd=2,
-     vertex.border="black", coord=kin_layout, 
+plot(cousinsnet, edge.col="grey60", edge.lwd=2, vertex.cex=2,
+     coord=kin_layout, main="Kinship network", vertex.lwd=0.5)
+plot(closekinnet, edge.col="grey30", edge.lwd=2, vertex.cex=2,
+     vertex.border="black", coord=kin_layout, vertex.lwd=0.5,
      vertex.col=clan, new=FALSE)
-plot(harv2014, edge.col=rgb(1, 0, 0, alpha=0.2), 
-     vertex.border="black", coord=kin_layout, 
+plot(harv2014, edge.col=rgb(1, 0, 0, alpha=0.2), vertex.cex=2,
+     vertex.border="black", coord=kin_layout, vertex.lwd=0.5,
      vertex.col=clan, new=FALSE)
-plot(harv2015, edge.col=rgb(0, 0, 1, alpha=0.2), 
-     vertex.border="black", coord=kin_layout, 
+plot(harv2015, edge.col=rgb(0, 0, 1, alpha=0.2), vertex.cex=2,
+     vertex.border="black", coord=kin_layout, vertex.lwd=0.5,
      vertex.col=clan, new=FALSE)
 legend("topright", legend=c(expression(paste(r >= 0.5)), 
                             expression(paste(r >= 0.125)),
                             "2014 harvest", "2015 harvest"),
-       col=c("black", "grey50", "red", "blue"), lty=1, bty="n", cex=0.75)
+       col=c("black", "grey50", "red", "blue"), lty=1, bty="n", cex=0.7)
 dev.off()
 
 
@@ -110,7 +110,7 @@ for (year in c("2014", "2015", "2016")) {
   #n groups
   n_groups <- n_contracts - n_alone
   #avg groupsize
-  i_temp <- i[!(i$ego_hh==i$partner_hh),]
+  i_temp <- i[-which(i$ego_hh==i$partner_hh),]
   i_temp2 <- unique(cbind.data.frame(hh=c(i_temp$ego_hh, i_temp$partner_hh), 
                                      con=c(i_temp$contract_id, i_temp$contract_id)))
   avg_groupsize <- mean(table(i_temp2$con))
@@ -120,19 +120,20 @@ for (year in c("2014", "2015", "2016")) {
   n_coop <- n_hh - n_alone
   #n edges
   i_net <- get(paste0("harv", year))
-  n_edges <- network.edgecount(i_net)
-  #avg_degree of harvesters
-  avg_nz_deg <- mean(degree(i_net, gmode="graph")[-which(degree(i_net)==0)])
+  imat <- as.sociomatrix(i_net)
+  imat[lower.tri(imat, diag=TRUE)] <- NA
+  n_edges <- sum(imat, na.rm=TRUE)
   #output
   print(paste(year, n_contracts, n_alone, n_groups, 
               round(avg_groupsize, 2), n_hh, n_coop, 
-              n_edges, round(avg_nz_deg,2)))
-  print(sort(i$ego_hh[i$ego_hh==i$partner_hh]))
+              n_edges))
 }
 
+#total hh ever participating (in text)
 length(unique(c(harvdat$ego_hh[!is.na(harvdat$year)], harvdat$partner_hh[!is.na(harvdat$year)])))
 
-#table 2 ADD 2016
+
+#table 2
 kin_coharvs <- clan_coharvs <- dist_coharvs <- sup_coharvs <- numeric()
 kin_sup <- clan_sup <- dist_sup <- sup_sup <- numeric()
 nokinconnect_coharvs <- noconnect_coharvs <- noconnect_sup <- numeric()
@@ -222,7 +223,7 @@ kinmat25 <- ifelse(kinmat<0.25, 0, 1)
 kinmat5 <- ifelse(kinmat<0.5, 0, 1)
 kinmat[kinmat !=0] <- 1
 clanmat <- as.sociomatrix(clannet)
-distmat <- as.sociomatrix(distnet, attrname="neighbor")
+neighbormat <- as.sociomatrix(neighbornet, attrname="neighbor")
 ss2014mat <- as.sociomatrix(network(as.sociomatrix(ss2014net), directed=FALSE))
 ss2015mat <- as.sociomatrix(network(as.sociomatrix(ss2015net), directed=FALSE))
 harv2014mat <- as.sociomatrix(harv2014)
@@ -249,18 +250,18 @@ for (year in c(1, 2)) {
         kin25 <- kinmat25[A,B]
         kin5 <- kinmat5[A,B]
         clan <- clanmat[A,B]
-        dist <- distmat[A,B]
-        temp <- data.frame(hidA-1, hidB-1, supAB, kin, clan, dist, harv)#,
-                           #kin125, kin25, kin5)
+        dist <- neighbormat[A,B]
+        temp <- data.frame(hidA-1, hidB-1, supAB, kin, clan, dist, harv,
+                           kin125, kin25, kin5)
         supel <- rbind.data.frame(supel, temp)
       }
     }
   }
+  write.table(supel, paste0("yunnan_networks", year2, "_harv.dat"),
+              sep=" ", row.names=FALSE, col.names=FALSE)
   write.table(supel[,c(1:3,6)], paste0("yunnan_networks_short", year2, ".dat"),
               sep=" ", row.names=FALSE, col.names=FALSE)
   write.table(supel[,c(1:3,6:7)], paste0("yunnan_networks_short", year2, "_harv.dat"), 
-              sep=" ", row.names=FALSE, col.names=FALSE)
-  write.table(supel[,c(1,2,7)], paste0("yunnan_networks_harv", year2, ".dat"),
               sep=" ", row.names=FALSE, col.names=FALSE)
 }
 
