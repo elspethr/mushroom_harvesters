@@ -185,3 +185,23 @@ p <- ggplot(w_long, aes(x=factor(layer, levels=c("Dist", "Sup", "Harv")),
   scale_fill_gradientn(colours=magma(10)[2:10])
 p
 dev.off()
+
+
+#harvest ties within communities
+for (year in years) {
+  harv <- get(paste0("harv", year))
+  harvmat <- as.sociomatrix(harv2014)
+  s <- read.csv(paste0(year, "/membership_5.txt"), header=FALSE)
+  ms <- s[,2:6]
+  ms <- ms/rowSums(ms)
+  ms[ms>0.00] <- 1
+  commat <- as.matrix(ms)%*%as.matrix(t(ms))
+  commat[which(commat>1)] <- 1
+  harvmat[lower.tri(harvmat, diag=TRUE)] <- NA
+  commat[lower.tri(commat, diag=TRUE)] <- NA
+  a <- length(harvmat[which(harvmat==1 & commat==0)])
+  b <- length(harvmat[which(harvmat==1 & commat==1)])
+  print(c(a/sum(harvmat, na.rm=TRUE),
+          b/sum(harvmat, na.rm=TRUE)))
+}
+
