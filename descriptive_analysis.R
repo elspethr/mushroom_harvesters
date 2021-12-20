@@ -44,13 +44,13 @@ contract_col2015 <- harv2015%v%"contract_id"
 contract_col2015[is.na(contract_col2015)] <- 0
 
 #plot
-png("Figure2.png", height=4/2.54, width=7.5/2.54, units="in", res=300, pointsize=7)
+png("Figure2_new.png", height=4/2.54, width=7.5/2.54, units="in", res=300, pointsize=7)
 par(mar=c(0,0,2,0), mfrow=c(1,2))
 palette(c("white", viridis(9), magma(8)))
 plot(ss2014net, vertex.col=contract_col2014+1,
      vertex.cex=(degree(ss2014net, cmode="indegree")+1)/3, 
      coord=layout1, vertex.border="black", 
-     edge.col="grey50", main="2014")
+     edge.col=rgb(0,0,0,alpha=0.3), main="2014")
 plot(harv2014, vertex.col=contract_col2014+1,
      vertex.cex=(degree(ss2014net, cmode="indegree")+1)/3, 
      edge.col=rgb(1,0,0, alpha=0.3), edge.lwd=0.05,
@@ -58,7 +58,7 @@ plot(harv2014, vertex.col=contract_col2014+1,
 plot(ss2015net_sub, vertex.col=contract_col2015+1,
      vertex.cex=(degree(ss2015net_sub, cmode="indegree")+1)/3, 
      coord=layout2, vertex.border="black", 
-     edge.col="grey50", main="2015")
+     edge.col=rgb(0,0,0,alpha=0.3), main="2015")
 plot(harv2014, vertex.col=contract_col2015+1,
      vertex.cex=(degree(ss2015net_sub, cmode="indegree")+1)/3,
      coord=layout2, vertex.border="black", 
@@ -68,7 +68,7 @@ plot(harv2015, vertex.col=contract_col2015+1,
      coord=layout2, vertex.border="black", 
      edge.col=rgb(0,0,1, alpha=0.3), new=FALSE)
 legend("topright", legend=c("Support tie", "2014 harvest", "2015 harvest"), 
-       col=c("grey50", "red", "blue"), lty=1, bty="n", cex=0.65)
+       col=c("grey30", "red", "blue"), lty=1, bty="n", cex=0.65)
 dev.off()
 
 # kinship #
@@ -76,24 +76,27 @@ dev.off()
 kin_layout <- network.layout.fruchtermanreingold(cousinsnet, NULL)
 clan <- hhdat$clan[which(hhdat$household_id %in% (cousinsnet%v%"vertex.names"))]
 
-png("Figure3.png", height=3.75/2.54, width=3.75/2.54, units="in", res=300, pointsize=5)
+png("Figure3_new.png", height=3.75/2.54, width=3.75/2.54, units="in", res=300, pointsize=5)
 par(mar=c(0,0,2,0), mfrow=c(1,1))
 palette(c(viridis(6), magma(6)))
 plot(cousinsnet, edge.col="grey60", edge.lwd=2, vertex.cex=2,
+     vertex.sides=clan+2, vertex.col=clan,
      coord=kin_layout, main="Kinship network", vertex.lwd=0.5)
-plot(closekinnet, edge.col="grey30", edge.lwd=2, vertex.cex=2,
-     vertex.border="black", coord=kin_layout, vertex.lwd=0.5,
-     vertex.col=clan, new=FALSE)
+#plot(closekinnet, edge.col="grey30", edge.lwd=2, vertex.cex=2,
+#     vertex.sides=clan+2,
+#     vertex.border="black", coord=kin_layout, vertex.lwd=0.5,
+#     vertex.col=clan, new=FALSE)
 plot(harv2014, edge.col=rgb(1, 0, 0, alpha=0.2), vertex.cex=2,
+     vertex.sides=clan+2, #edge.curve=0.02, usecurve=TRUE,
      vertex.border="black", coord=kin_layout, vertex.lwd=0.5,
      vertex.col=clan, new=FALSE)
 plot(harv2015, edge.col=rgb(0, 0, 1, alpha=0.2), vertex.cex=2,
+     vertex.sides=clan+2, #edge.curve=0.02, usecurve=TRUE,
      vertex.border="black", coord=kin_layout, vertex.lwd=0.5,
      vertex.col=clan, new=FALSE)
-legend("topright", legend=c(expression(paste(r >= 0.5)), 
-                            expression(paste(r >= 0.125)),
+legend("topright", legend=c(expression(paste(r >= 0.125)),
                             "2014 harvest", "2015 harvest"),
-       col=c("black", "grey50", "red", "blue"), lty=1, bty="n", cex=0.7)
+       col=c("grey50", "red", "blue"), lty=1, bty="n", cex=0.7)
 dev.off()
 
 
