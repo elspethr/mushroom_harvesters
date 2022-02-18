@@ -87,6 +87,7 @@ def main():
               [0, 1], [0, 2], [0, 3], [0, 2, 3], [0, 1, 2, 3],
               [4, 1], [4, 2], [4, 3], [4, 1, 2, 3], [4, 0], [4, 0, 1, 2, 3],
               [4, 5], [4, 6], [4, 7],
+              [4, 1, 3], [4, 1, 2], [4, 1, 0], [4, 1, 0, 3], [4, 1, 2, 0],
               [4, 0, 2], [4, 0, 3], [4, 0, 2], [4, 0, 2, 3],
               [0, 5], [0, 6], [0, 7]]
   comb_name = ["sup", "harv",
@@ -94,6 +95,7 @@ def main():
                "sup_kin", "sup_clan", "sup_dist", "sup_clandist", "sup_kinclandist",
                "harv_kin", "harv_clan", "harv_dist", "harv_kinclandist", "harv_sup", "harv_all",
                "harv_kin125", "harv_kin25", "harv_kin5",
+               "harv_kindist", "harv_kinclan", "harv_kinsup", "harv_kinsupdist", "harv_kinclansup",
                "harv_supclan",  "harv_supdist", "harv_clandist", "harv_supclandist",
                "sup_kin125", "sup_kin25", "sup_kin5"]
   min_grp = 2

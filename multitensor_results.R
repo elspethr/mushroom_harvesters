@@ -44,14 +44,17 @@ harvmodels <- c("harv", "harv_kin5", #"harv_kin25", "harv_kin125",
                 "harv_kin", "harv_clan", "harv_dist", "harv_sup")
 supmodels <- c("sup", "sup_kin5", #"sup_kin25", "sup_kin125", 
                "sup_kin", "sup_clan", "sup_dist", "sup_clandist")
-harvsupmodels <- c("harv", "harv_clandist", "harv_supdist", "harv_supclan",
-                   "harv_kinclandist", "harv_supclandist", "harv_all")
+harvsupmodels <- c("harv", "harv_clandist", "harv_supdist", "harv_supclan", 
+                   "harv_kindist", "harv_kinclan", "harv_kinsup")
+othermodels <- c("harv", "harv_kinclandist", "harv_kinsupdist", "harv_kinclansup",
+            "harv_supclandist", "harv_all")
 
 #AUC plots (Figure 5 is 4FCV)
 for (nf in c(2,3,4,5,6)) {
-  png(paste0("auc_results_", nf, "FCV.png"), height=8, width=7.5, 
+  png(paste0("auc_results_", nf, "FCV.png"), height=11, width=8, 
       units="cm", res=400, pointsize=6)
-  par(mfrow=c(3,2), mar=c(2,4,3,1), lwd=0.5)
+  #par(mfrow=c(3,2), mar=c(2,4,3,1), lwd=0.5)
+  par(mfrow=c(4,2), mar=c(2,4,3,1), lwd=0.5)
   cols <- c("grey50", viridis(5))
   for (year in years) {
     plot(c(2,10), c(0.0, 1), type="n", xlab="", ylab="AUC", 
@@ -82,7 +85,6 @@ for (nf in c(2,3,4,5,6)) {
   }
   legend(8.3, 0.6, harvmodels[2:length(harvmodels)], 
          col=cols[2:length(harvmodels)], pch=19, cex=0.65, bg="white")
-  par(mar=c(4,4,1,1))
   cols <- c("grey50", viridis(7)[2:7])
   for (year in years) {
     plot(c(2,10), c(0, 1), type="n", xlab="N groups", 
@@ -96,65 +98,26 @@ for (nf in c(2,3,4,5,6)) {
       points(jitter(temp$V1), jitter(temp$V3, 0.01), pch=19, col=cols[i])
     }
   }
-  legend(7.5, 0.55, harvsupmodels[2:length(harvsupmodels)], 
+  legend(8, 0.55, harvsupmodels[2:length(harvsupmodels)], 
          col=cols[2:length(harvsupmodels)], pch=19, cex=0.65, bg="white")
-  dev.off()
-}
-
-for (nf in c(2,3,4,5,6)) {
-  png(paste0("auc_results_", nf, "FCV.png"), height=8, width=7.5, 
-      units="cm", res=400, pointsize=6)
-  par(mfrow=c(3,2), mar=c(2,4,3,1), lwd=0.5)
-  cols <- c("grey50", viridis(5))
-  for (year in years) {
-    plot(c(2,10), c(0.0, 1), type="n", xlab="", ylab="AUC", 
-         main=year, xaxt="n", yaxt="n")
-    for (i in 1:length(supmodels)) {
-      abline(h=0.5, lty=3, lwd=0.5)
-      temp <- read.csv(paste0(year, "/cv_auc_", supmodels[i], "_", nf, "FCV.txt"), header=FALSE)
-      axis(1, at = 0:10, lwd=0, lwd.tick=0.5, lab=T)
-      axis(2, at = seq(0, 1, 0.2), lwd=0, lwd.tick=0.5, lab=T)
-      #points(jitter(temp$V1), jitter(temp$V2, 0.01), pch=1, col=cols[i])
-      lines(temp$V1, temp$V3, lty=3, col=cols[i], lwd=0.5)
-      points(jitter(temp$V1), jitter(temp$V3, 0.01), pch=19, col=cols[i])
-    }
-  }
-  legend(8.0, 0.6, supmodels, col=cols, pch=19, cex=0.65, bg="white")
-  par(mar=c(2,4,2,1))
-  for (year in years) {
-    plot(c(2,10), c(0, 1), type="n", xlab="", 
-         ylab="AUC", main="", xaxt="n", yaxt="n")
-    for (i in 2:length(harvmodels)) {
-      abline(h=0.5, lty=3, lwd=0.5)
-      temp <- read.csv(paste0(year, "/cv_auc_", harvmodels[i], "_", nf, "FCV.txt"), header=FALSE)
-      axis(1, at = 0:10, lwd=0, lwd.tick=0.5, lab=T)
-      axis(2, at = seq(0, 1, 0.2), lwd=0, lwd.tick=0.5, lab=T)
-      lines(temp$V1, temp$V3, lty=3, col=cols[i], lwd=0.5)
-      points(jitter(temp$V1), jitter(temp$V3, 0.01), pch=19, col=cols[i])
-    }
-  }
-  legend(8.3, 0.6, harvmodels[2:length(harvmodels)], 
-         col=cols[2:length(harvmodels)], pch=19, cex=0.65, bg="white")
   par(mar=c(4,4,1,1))
-  cols <- c("grey50", viridis(7)[2:7])
+  cols <- c("grey50", viridis(6)[2:6])
   for (year in years) {
     plot(c(2,10), c(0, 1), type="n", xlab="N groups", 
          ylab="AUC", main="", xaxt="n", yaxt="n")
-    for (i in 2:length(harvsupmodels)) {
+    for (i in 2:length(othermodels)) {
       abline(h=0.5, lty=3, lwd=0.5)
-      temp <- read.csv(paste0(year, "/cv_auc_", harvsupmodels[i], "_", nf, "FCV.txt"), header=FALSE)
+      temp <- read.csv(paste0(year, "/cv_auc_", othermodels[i], "_", nf, "FCV.txt"), header=FALSE)
       axis(1, at = 0:10, lwd=0, lwd.tick=0.5, lab=T)
       axis(2, at = seq(0, 1, 0.2), lwd=0, lwd.tick=0.5, lab=T)
       lines(temp$V1, temp$V3, lty=3, col=cols[i], lwd=0.5)
       points(jitter(temp$V1), jitter(temp$V3, 0.01), pch=19, col=cols[i])
     }
   }
-  legend(7.5, 0.55, harvsupmodels[2:length(harvsupmodels)], 
-         col=cols[2:length(harvsupmodels)], pch=19, cex=0.65, bg="white")
+  legend(7.5, 0.55, extras[2:length(othermodels)], 
+         col=cols[2:length(othermodels)], pch=19, cex=0.65, bg="white")
   dev.off()
 }
-
-
 
 ### compare membership of models with and without harv ###
 layout <- network.layout.fruchtermanreingold(kinnet+clannet+harv2014+harv2015+network(distmat), NULL)
