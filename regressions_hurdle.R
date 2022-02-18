@@ -140,13 +140,13 @@ contractpreds2015 <- precis(harvm5, depth=3)[348:362,]
 cooppreds2014 <- precis(harvm5, depth=3)[363:377,]
 cooppreds2015 <- precis(harvm5, depth=3)[378:392,]
 
-png("Figure4.png", height=3.5, width=7.5, units="cm", res=300, pointsize=4)
-par(mar=c(3,4,3,1), mfrow=c(1,2))
+png("Figure4_new.png", height=3.5, width=7.5, units="cm", res=300, pointsize=4)
+par(mar=c(4,4,3,1), mfrow=c(1,2))
 for (year in c("2014", "2015")) {
   contractpreds <- get(paste0("contractpreds", year))
   cooppreds <- get(paste0("cooppreds", year))
   plot(1:15, inv_logit(contractpreds$mean), ylim=c(-0.05, 1.05),
-       ylab="Prob. harvest", xlab="Support Ties", main=year, type="n")
+       ylab="Prob. harvest", xlab="Freeman degree", main=year, type="n")
   if (year == "2014") {
     points(jitter(dat$deg[1:73], 0.1), jitter(dat$contract[1:73], 0.1), 
            pch=16, cex=1.3, col=ifelse(dat$coop[1:73]+dat$contract[1:73]==2, c3, c1))

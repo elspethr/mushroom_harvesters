@@ -20,7 +20,7 @@ library(RColorBrewer)
 library(viridis)
 
 #clean workspace
-keep <- c("kindat", "kinnet", "closekinnet", "cousinsnet", "clannet", "neighbornet"
+keep <- c("kindat", "kinnet", "closekinnet", "cousinsnet", "clannet", "neighbornet",
           "distnet", "hhdat", "harvdat", "harv2014", "harv2015", 
           "harv2016", "ss2014net", "ss2015net", "ss2015net_sub")
 rm(list=setdiff(ls(), keep))
@@ -35,36 +35,39 @@ OR <- function(a, b) {
 
 #make layouts reflecting both ties so can use same layout
 layout1 <- network.layout.fruchtermanreingold(ss2014net+harv2014, NULL)
-layout2 <- network.layout.fruchtermanreingold(ss2015net+harv2015, NULL)
+layout2 <- network.layout.fruchtermanreingold(ss2015net+harv2015+ss2014net+harv2014, NULL)
 
 #make colour vectors so NA is not transparent
 contract_col2014 <- harv2014%v%"contract_id"
 contract_col2014[is.na(contract_col2014)] <- 0
-contract_col2015 <- harv2015%v%"contract_id"
+contract_col2015 <- harv2015%v%"contract_id"-142
 contract_col2015[is.na(contract_col2015)] <- 0
+contract_col2015[contract_col2015>4] <- contract_col2015[contract_col2015>4]-1
+contract_col2015[contract_col2015>9] <- contract_col2015[contract_col2015>9]-1
 
 #plot
 png("Figure2_new.png", height=4/2.54, width=7.5/2.54, units="in", res=300, pointsize=7)
 par(mar=c(0,0,2,0), mfrow=c(1,2))
-palette(c("white", viridis(9), magma(8)))
+palette(c("white", viridis(17)))
 plot(ss2014net, vertex.col=contract_col2014+1,
-     vertex.cex=(degree(ss2014net, cmode="indegree")+1)/3, 
-     coord=layout1, vertex.border="black", 
+     vertex.cex=(degree(ss2014net, cmode="indegree")+1)/2.5, 
+     coord=layout2, vertex.border="black", 
      edge.col=rgb(0,0,0,alpha=0.3), main="2014")
 plot(harv2014, vertex.col=contract_col2014+1,
-     vertex.cex=(degree(ss2014net, cmode="indegree")+1)/3, 
+     vertex.cex=(degree(ss2014net, cmode="indegree")+1)/2.5, 
      edge.col=rgb(1,0,0, alpha=0.3), edge.lwd=0.05,
-     coord=layout1, vertex.border="black", new=FALSE)
+     coord=layout2, vertex.border="black", new=FALSE)
+palette(c("white", vridis(17)))
 plot(ss2015net_sub, vertex.col=contract_col2015+1,
-     vertex.cex=(degree(ss2015net_sub, cmode="indegree")+1)/3, 
+     vertex.cex=(degree(ss2015net_sub, cmode="indegree")+1)/2.5, 
      coord=layout2, vertex.border="black", 
      edge.col=rgb(0,0,0,alpha=0.3), main="2015")
-plot(harv2014, vertex.col=contract_col2015+1,
-     vertex.cex=(degree(ss2015net_sub, cmode="indegree")+1)/3,
-     coord=layout2, vertex.border="black", 
-     edge.col=rgb(1,0,0, alpha=0.3), new=FALSE)
+#plot(harv2014, vertex.col=contract_col2015+1,
+#     vertex.cex=(degree(ss2015net_sub, cmode="indegree")+1)/3,
+#     coord=layout2, vertex.border="black", 
+#     edge.col=rgb(1,0,0, alpha=0.3), new=FALSE)
 plot(harv2015, vertex.col=contract_col2015+1,
-     vertex.cex=(degree(ss2015net_sub, cmode="indegree")+1)/3,
+     vertex.cex=(degree(ss2015net_sub, cmode="indegree")+1)/2.5,
      coord=layout2, vertex.border="black", 
      edge.col=rgb(0,0,1, alpha=0.3), new=FALSE)
 legend("topright", legend=c("Support tie", "2014 harvest", "2015 harvest"), 
@@ -215,7 +218,7 @@ for (year in c("2014", "2015", "2016")) {
   print(paste(round(harvsupprop, 2), round(supsupprop, 2), round(supprop, 2),
         round(OR(harvsupprop, supprop), 2)))
   #no connect
-  print(paste(round(harvkinnocon, 2), round(harvnocon, 2), round(supnocon, 2)))
+  #print(paste(round(harvkinnocon, 2), round(harvnocon, 2), round(supnocon, 2)))
 }
 
 ### data prep for Cate's model ###

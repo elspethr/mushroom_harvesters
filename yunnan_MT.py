@@ -97,7 +97,7 @@ def main():
                "harv_supclan",  "harv_supdist", "harv_clandist", "harv_supclandist",
                "sup_kin125", "sup_kin25", "sup_kin5"]
   min_grp = 2
-  max_grp = 15
+  max_grp = 10
 
   ### loop for layer interdependence/link prediction ###
 
@@ -136,7 +136,7 @@ def main():
 
   for year in years:
     #arrange data
-    for label in [0, 1]:
+    for label in [1]:
       if label == 0:
         lab = ""
       else:
@@ -160,7 +160,6 @@ def main():
               for aff in group:
                 f.write("%s," % aff)
               f.write("\n")
-
 
 ######
 
