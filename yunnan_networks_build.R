@@ -67,17 +67,34 @@ ss2014$egoHH_ind <- as.numeric(factor(ss2014$egoHH, levels=1:75, exclude=c(64, 6
 ss2014$alterHH_ind <- as.numeric(factor(ss2014$alterHH, levels=1:75, exclude=c(64, 65)))
 
 #make 2014 network
-ss2014net <- network.initialize(length(allhh), directed=TRUE) 
-ss2014net %v%"vertex.names" <- as.numeric(allhh)
+ss2014net_multiple <- network.initialize(length(allhh), directed=TRUE, multiple=TRUE) 
+ss2014net <- network.initialize(length(allhh), directed=TRUE, multiple=FALSE) 
+ss2014net %v%"vertex.names" <- ss2014net_multiple %v%"vertex.names" <- as.numeric(allhh)
 socedges2014 <- ss2014[,c(8,7)] #SWITCHING ORDER SO TIES ARE INCOMING
 socedges2014 <- socedges2014[!(socedges2014$egoHH_ind==socedges2014$alterHH_ind),]
-socedges2014 <- socedges2014[!duplicated(socedges2014),] #allow only one edge btw HH (for now)
-ss2014net <- network.edgelist(socedges2014, ss2014net, edge.check=TRUE)
+ss2014net_multiple <- network.edgelist(socedges2014, ss2014net_multiple)
+
+socedges2014_simple <- socedges2014[!duplicated(socedges2014),] #allow only one edge btw HH (for now)
+ss2014net <- network.edgelist(socedges2014_simple, ss2014net)
+
+#make 2014 separate nets
+ss2014social <- network.initialize(length(allhh), directed=TRUE, multiple=FALSE)
+ss2014social%v%"vertex.names" <- as.numeric(allhh)
+ss2014labor <- ss2014info <- ss2014social
+#importantedges2014 <- ss2014[which(ss2014$relation=="important"),c(8,7)]
+ss2014 <- ss2014[!(ss2014$egoHH_ind==ss2014$alterHH_ind),]
+laboredges2014 <- ss2014[which(ss2014$relation=="labor"),c(8,7)]
+infoedges2014 <- ss2014[c(grep("info", ss2014$relation), grep("important", ss2014$relation)),c(8,7)]
+socialedges2014 <- ss2014[grep("social", ss2014$relation),c(8,7)]
+#ss2014important <- network.edgelist(socedges2014, ss2014important)
+ss2014labor <- network.edgelist(laboredges2014, ss2014labor)
+ss2014info<- network.edgelist(infoedges2014, ss2014info)
+ss2014social <- network.edgelist(socialedges2014, ss2014social)
 
 #2015: clean data
 ss2015 <- read.csv("socialtieswholecommunity2015.csv", stringsAsFactors=FALSE)
 ss2015 <- ss2015[-which(ss2015$alter=="gege"),] #removed, unknown brother
-ss2015 <- ss2015[-which(ss2015$alter=="zhierzi"),] #removed, unknowh nephew
+ss2015 <- ss2015[-which(ss2015$alter=="zhierzi"),] #removed, unknown nephew
 ss2015 <- ss2015[-which(ss2015$alterHH=="64"),] 
 ss2015 <- ss2015[-which(ss2015$egoHH=="65"),] 
 ss2015 <- ss2015[!(ss2015$egoHH==ss2015$alterHH),] #disallow self-nominations
@@ -95,10 +112,14 @@ ss2015_out$alterHH_ind <- temp
 ss2015 <- rbind.data.frame(ss2015_in, ss2015_out)
 
 #make 2015 network (all questions asked)
-ss2015net <- network.initialize(length(allhh), directed=TRUE)
+ss2015net_multiple <- network.initialize(length(allhh), directed=TRUE,  multiple=TRUE)
+ss2015net <- network.initialize(length(allhh), directed=TRUE,  multiple=FALSE)
+ss2015net %v%"vertex.names" <- ss2015net_multiple %v%"vertex.names" <- as.numeric(allhh)
 socedges2015 <- ss2015[,c(7,6)]  #SWITCHING ORDER SO TIES ARE INCOMING
-socedges2015 <- socedges2015[!duplicated(socedges2015),] #allow only one edge btw HH (for now)
-ss2015net <- network.edgelist(socedges2015, ss2015net)
+ss2015net_multiple <- network.edgelist(socedges2015, ss2015net_multiple)
+
+socedges2015_simple <- socedges2015[!duplicated(socedges2015),] #allow only one edge btw HH 
+ss2015net <- network.edgelist(socedges2015_simple, ss2015net)
 
 #make 2015 network (same ties as 2014)
 ss2015_sub <- ss2015[which(ss2015$typeoftie %in% c("farmwork", "socialization", "information", "important")),]
@@ -106,6 +127,25 @@ ss2015net_sub <- network.initialize(length(allhh), directed=TRUE)
 socedges2015_sub <- ss2015_sub[,c(7,6)] #SWITCHING ORDER SO TIES ARE INCOMING SUPPORT
 socedges2015_sub <- socedges2015_sub[!duplicated(socedges2015_sub),] #allow only one edge btw HH (for now)
 ss2015net_sub <- network.edgelist(socedges2015_sub, ss2015net_sub)
+
+#make separate nets for different layers
+ss2015$tt2 <- ss2015$typeoftie
+ss2015$tt2[grep("help", ss2015$tt2)] <- "labor"
+ss2015$tt2[grep("watch", ss2015$tt2)] <- "labor"
+ss2015$tt2[grep("farmwork", ss2015$tt2)] <- "labor"
+ss2015$tt2[grep("find", ss2015$tt2)] <- "information"
+
+ss2015social <- network.initialize(length(allhh), directed=TRUE, multiple=FALSE)
+ss2015social%v%"vertex.names" <- as.numeric(allhh)
+ss2015labor <- ss2015info <- ss2015social
+#importantedges2015 <- ss2014[which(ss2014$relation=="important"),c(8,7)]
+laboredges2015 <- ss2015[which(ss2015$tt2=="labor"),c(7,6)]
+infoedges2015 <- ss2015[c(grep("info", ss2015$tt2), grep("important", ss2015$tt2)),c(7,6)]
+socialedges2015 <- ss2015[grep("social", ss2015$tt2),c(7,6)]
+#ss2015important <- network.edgelist(socedges2014, ss2014important)
+ss2015labor <- network.edgelist(laboredges2015, ss2015labor)
+ss2015info<- network.edgelist(infoedges2015, ss2015info)
+ss2015social <- network.edgelist(socialedges2015, ss2015social)
 
 ### distances ###
 

@@ -15,9 +15,9 @@ source("yunnan_networks_build.R")
 library(rethinking) #requires rstan
 
 #clean workspace
-keep <- c("kindat", "kinnet", "closekinnet", "cousinsnet", "clannet",
-          "distnet", "hhdat", "harvdat", "harv2014", "harv2015", "harv2016", 
-          "ss2014net", "ss2015net", "ss2015net_sub")
+keep <- c("harv2014", "harv2015", 
+          "ss2014net", "ss2014net_multiple", "ss2014labor",
+          "ss2015net", "ss2015net_multiple", "ss2015labor")
 rm(list=setdiff(ls(), keep))
 
 ### regression model ###
@@ -28,8 +28,9 @@ contract <- as.numeric(c(harv2014%v%"contract",
 harv2014 <- as.network(as.sociomatrix(harv2014), loops=FALSE, directed=FALSE)
 harv2015 <- as.network(as.sociomatrix(harv2015), loops=FALSE, directed=FALSE)
 
-dat <-  list(deg = c(degree(ss2014net, cmode = "freeman"), 
-                     degree(ss2015net, cmode = "freeman")),
+#to run this for net strength or only labor ties sub in the other networks
+dat <-  list(deg = c(degree(ss2014net_multiple, cmode = "freeman"), 
+                     degree(ss2015net_multiple, cmode = "freeman")),
              contract = contract,
              harv = c(degree(harv2014, gmode="graph"), 
                       degree(harv2015, gmode="graph")),
@@ -140,7 +141,7 @@ contractpreds2015 <- precis(harvm5, depth=3)[348:362,]
 cooppreds2014 <- precis(harvm5, depth=3)[363:377,]
 cooppreds2015 <- precis(harvm5, depth=3)[378:392,]
 
-png("Figure4_new.png", height=3.5, width=7.5, units="cm", res=300, pointsize=4)
+pdf("Figure4_new.pdf", height=3.5, width=7.5, pointsize=8)
 par(mar=c(4,4,3,1), mfrow=c(1,2))
 for (year in c("2014", "2015")) {
   contractpreds <- get(paste0("contractpreds", year))

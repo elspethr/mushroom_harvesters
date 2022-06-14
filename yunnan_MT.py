@@ -81,23 +81,72 @@ def main():
   rseed = 78953
   directed = np.logical_not(undirected)
 
+  #0 sup
+  #1 social
+  #2 info
+  #3 labor
+  #4 kin
+  #5 clan
+  #6 dist
+  #7 harv
+
   #what layer/group combinations to run
-  ly_combs = [[0], [4],
-              [1, 2], [1, 3],
-              [0, 1], [0, 2], [0, 3], [0, 2, 3], [0, 1, 2, 3],
-              [4, 1], [4, 2], [4, 3], [4, 1, 2, 3], [4, 0], [4, 0, 1, 2, 3],
-              [4, 5], [4, 6], [4, 7],
-              [4, 1, 3], [4, 1, 2], [4, 1, 0], [4, 1, 0, 3], [4, 1, 2, 0],
-              [4, 0, 2], [4, 0, 3], [4, 0, 2], [4, 0, 2, 3],
-              [0, 5], [0, 6], [0, 7]]
+  ly_combs = [[0], [7],
+              [5, 6], [4, 6],
+              # original sup models
+              [0, 4], [0, 5], [0, 6], [0, 4, 6], [0, 5, 6], [0, 4, 5, 6],
+              #[0, 5], [0, 6], [0, 7],
+              # new sup models
+              [3, 4], [3, 5], [3, 6], [3, 4, 6], [3, 5, 6], [3, 4, 5, 6],
+              [3, 1], [3, 2], [3, 1, 2],
+              # original harv models
+              [7, 4], [7, 5], [7, 6], [7, 4, 5, 6], [7, 0], [7, 0, 4, 5, 6],
+              #[4, 5], [4, 6], [4, 7],
+              [7, 4, 6], [7, 4, 5], [7, 4, 0], [7, 0, 4, 6], [7, 4, 5, 0],
+              [7, 0, 5], [7, 0, 6], [7, 5, 6], [7, 0, 5, 6],
+              # new harv models
+              [7, 1], [7, 2], [7,3],
+              [7, 1, 2], [7, 1, 3], [7, 2, 3], [7, 1, 2, 3],
+              # new harv models with dist
+              [7, 1, 6], [7, 2, 6], [7, 3, 6],
+              [7, 1, 2, 6], [7, 1, 3, 6], [7, 2, 3, 6], [7, 1, 2, 3, 6],
+              # new harv models with kin
+              [7, 1, 4], [7, 2, 4], [7, 3, 4],
+              [7, 1, 2, 4], [7, 1, 3, 4], [7, 2, 3, 4], [7, 1, 2, 3, 4],
+              # new harv models with kin and dist
+              [7, 1, 4, 6], [7, 2, 4, 6], [7, 3, 4, 6],
+              [7, 1, 2, 4, 6], [7, 1, 3, 4, 6], [7, 2, 3, 4, 6], [7, 1, 2, 3, 4, 6],
+              ]
   comb_name = ["sup", "harv",
-               "kin_clan", "kin_dist",
-               "sup_kin", "sup_clan", "sup_dist", "sup_clandist", "sup_kinclandist",
+               "dist_clan", "dist_kin",
+               # original sup models
+               "sup_kin", "sup_clan", "sup_dist", "sup_kindist", "sup_clandist", "sup_kinclandist",
+               #"sup_kin125", "sup_kin25", "sup_kin5",
+               # new sup models
+               "labor_kin", "labor_clan", "labor_dist", "labor_kindist", "labor_clandist", "labor_kinclandist",
+               "labor_social", "labor_info", "labor_socialinfo",
+               # original harv models
                "harv_kin", "harv_clan", "harv_dist", "harv_kinclandist", "harv_sup", "harv_all",
-               "harv_kin125", "harv_kin25", "harv_kin5",
+               #"harv_kin125", "harv_kin25", "harv_kin5",
                "harv_kindist", "harv_kinclan", "harv_kinsup", "harv_kinsupdist", "harv_kinclansup",
                "harv_supclan",  "harv_supdist", "harv_clandist", "harv_supclandist",
-               "sup_kin125", "sup_kin25", "sup_kin5"]
+               # new harv models
+               "harv_social", "harv_info", "harv_labor",
+               "harv_socialinfo", "harv_sociallabor", "harv_infolabor",
+               "harv_socialinfolabor",
+               # new harv models with dist
+               "harv_socialdist", "harv_infodist", "harv_labordist",
+               "harv_socialinfodist", "harv_sociallabordist", "harv_infolabordist",
+               "harv_socialinfolabordist"
+               # new harv models with kin
+               "harv_socialkin", "harv_infokin", "harv_laborkin",
+               "harv_socialinfokin", "harv_sociallaborkin", "harv_infolaborkin",
+               "harv_socialinfolaborkin",
+               # new harv models with kin and dist
+               "harv_socialkindist", "harv_infokindist", "harv_laborkindist",
+               "harv_socialinfokindist", "harv_sociallaborkindist", "harv_infolaborkindist",
+               "harv_socialinfolaborkindist" 
+              ]
   min_grp = 2
   max_grp = 10
 
@@ -105,8 +154,8 @@ def main():
 
   for year in years:
    #arrange data
-   label = '_harv'
-   adj_name = 'yunnan_networks_' + year + label + '.dat'
+   #label = '_harv'
+   adj_name = 'yunnan_networks_' + year + '.dat'
    A, data0, nodes, nodeName2Id, nodeId2Name = tl.import_data(in_folder, adj_name=adj_name, sep='\s+', header=None,
                                                                 ego=0, alter=1, undirected=undirected, verbose=0)
    for nf in [2,3,4,5,6]:
@@ -136,32 +185,32 @@ def main():
              
   ### loop for straight up group membership ###
 
-  for year in years:
-    #arrange data
-    for label in [1]:
-      if label == 0:
-        lab = ""
-      else:
-        lab = "_harv"
-      adj_name = in_folder + 'yunnan_networks_short' + year + lab + '.dat'
-      #adj_name = in_folder + 'yunnan_networks_harv' + year + '.dat'
-      for K in range(min_grp, (max_grp+1)): 
-          u0, v0, w0, report = multitensor.run(adj_name, K, seed=rseed, nof_realizations=10,
-                                               assortative=assortative, max_nof_iterations=500, directed=directed,
-                                               nof_convergences=2)
-          fname3 = out_folder + year +"/membership" + lab + "_%s.txt" % K
-          #fname3 = out_folder + year +"/membership_harvonly" + lab + "_%s.txt" % K
-          with open(fname3, 'w') as f:
-            for node in u0: #note multitensor.run gives diff output than run_mt_with_cv
-              for prob in node:
-                f.write("%s," % prob)
-              f.write("\n")
-          fname4 = out_folder + year + "/affinity" + year + lab + "_%s.txt" % K
-          with open(fname4, 'w') as f:
-            for group in w0:
-              for aff in group:
-                f.write("%s," % aff)
-              f.write("\n")
+  #for year in years:
+  #  #arrange data
+  #  for label in [1]:
+  #    if label == 0:
+  #      lab = ""
+  #    else:
+  #      lab = "_harv"
+  #    adj_name = in_folder + 'yunnan_networks_short' + year + lab + '.dat'
+  #    adj_name = in_folder + 'yunnan_networks_harv' + year + '.dat'
+  #    for K in range(min_grp, (max_grp+1)): 
+  #        u0, v0, w0, report = multitensor.run(adj_name, K, seed=rseed, nof_realizations=10,
+  #                                             assortative=assortative, max_nof_iterations=500, directed=directed,
+  #                                             nof_convergences=2)
+  #        fname3 = out_folder + year +"/membership" + lab + "_%s.txt" % K
+  #        #fname3 = out_folder + year +"/membership_harvonly" + lab + "_%s.txt" % K
+  #        with open(fname3, 'w') as f:
+  #          for node in u0: #note multitensor.run gives diff output than run_mt_with_cv
+  #            for prob in node:
+  #              f.write("%s," % prob)
+  #            f.write("\n")
+  #        fname4 = out_folder + year + "/affinity" + year + lab + "_%s.txt" % K
+  #        with open(fname4, 'w') as f:
+  #          for group in w0:
+  #            for aff in group:
+  #              f.write("%s," % aff)
+  #            f.write("\n")
 
 ######
 
