@@ -130,10 +130,10 @@ ss2015net_sub <- network.edgelist(socedges2015_sub, ss2015net_sub)
 
 #make separate nets for different layers
 ss2015$tt2 <- ss2015$typeoftie
-ss2015$tt2[grep("help", ss2015$tt2)] <- "labor"
-ss2015$tt2[grep("watch", ss2015$tt2)] <- "labor"
+#ss2015$tt2[grep("help", ss2015$tt2)] <- "labor"
+#ss2015$tt2[grep("watch", ss2015$tt2)] <- "labor"
 ss2015$tt2[grep("farmwork", ss2015$tt2)] <- "labor"
-ss2015$tt2[grep("find", ss2015$tt2)] <- "information"
+#ss2015$tt2[grep("find", ss2015$tt2)] <- "information"
 
 ss2015social <- network.initialize(length(allhh), directed=TRUE, multiple=FALSE)
 ss2015social%v%"vertex.names" <- as.numeric(allhh)

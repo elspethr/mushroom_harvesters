@@ -50,15 +50,17 @@ othermodels <- c("harv", "harv_kinclandist", "harv_kinsupdist", "harv_kinclansup
             "harv_supclandist", "harv_all")
 
 #AUC plots (Figure 5 is 4FCV)
-for (nf in c(2,3,4,5,6)) {
-  png(paste0("auc_results_", nf, "FCV.png"), height=11, width=8, 
+for (nf in 4) { #c(2,3,4,5,6)
+  png(paste0("auc_results_", nf, "FCV_RII.png"), height=11, width=8, 
       units="cm", res=400, pointsize=6)
   #par(mfrow=c(3,2), mar=c(2,4,3,1), lwd=0.5)
-  par(mfrow=c(4,2), mar=c(2,4,3,1), lwd=0.5)
+  par(mfrow=c(4,2), mar=c(1.5,4,4,1), lwd=0.5)
   cols <- c("grey50", viridis(5))
   for (year in years) {
     plot(c(2,10), c(0.0, 1), type="n", xlab="", ylab="AUC", 
-         main=year, xaxt="n", yaxt="n")
+         main="", xaxt="n", yaxt="n")
+    mtext(year, side=3, line=2, cex=0.9)
+    if (year==2014) {mtext("(a) base layer support + one layer", 3, line=0.5, adj=0, cex=0.75, font=2)}
     for (i in 1:length(supmodels)) {
       abline(h=0.5, lty=3, lwd=0.5)
       temp <- read.csv(paste0(year, "/cv_auc_", supmodels[i], "_", nf, "FCV.txt"), header=FALSE)
@@ -70,10 +72,11 @@ for (nf in c(2,3,4,5,6)) {
     }
   }
   legend(8.0, 0.6, supmodels, col=cols, pch=19, cex=0.65, bg="white")
-  par(mar=c(2,4,2,1))
+  par(mar=c(1.5,4,4,1))
   for (year in years) {
     plot(c(2,10), c(0, 1), type="n", xlab="", 
-         ylab="AUC", main="", xaxt="n", yaxt="n")
+         ylab="AUC", main="", sub="(a) base layer harvest + one layer",xaxt="n", yaxt="n")
+    if (year==2014) {mtext("(b) base layer harvest + one layer", 3, line=0.5, adj=0, cex=0.75, font=2)}
     for (i in 2:length(harvmodels)) {
       abline(h=0.5, lty=3, lwd=0.5)
       temp <- read.csv(paste0(year, "/cv_auc_", harvmodels[i], "_", nf, "FCV.txt"), header=FALSE)
@@ -89,6 +92,7 @@ for (nf in c(2,3,4,5,6)) {
   for (year in years) {
     plot(c(2,10), c(0, 1), type="n", xlab="N groups", 
          ylab="AUC", main="", xaxt="n", yaxt="n")
+    if (year==2014) {mtext("(c) base layer harvest + two layers", 3, line=0.5, adj=0, cex=0.75, font=2)}
     for (i in 2:length(harvsupmodels)) {
       abline(h=0.5, lty=3, lwd=0.5)
       temp <- read.csv(paste0(year, "/cv_auc_", harvsupmodels[i], "_", nf, "FCV.txt"), header=FALSE)
@@ -100,11 +104,14 @@ for (nf in c(2,3,4,5,6)) {
   }
   legend(8, 0.55, harvsupmodels[2:length(harvsupmodels)], 
          col=cols[2:length(harvsupmodels)], pch=19, cex=0.65, bg="white")
-  par(mar=c(4,4,1,1))
+  #mtext(3, "(c) base layer harvest + two layers")
+  par(mar=c(3,4,3,1))
   cols <- c("grey50", viridis(6)[2:6])
   for (year in years) {
     plot(c(2,10), c(0, 1), type="n", xlab="N groups", 
          ylab="AUC", main="", xaxt="n", yaxt="n")
+    if (year==2014) {mtext("(d) base layer harvest + three or more layers", 3, line=0.5, adj=0, cex=0.75, font=2)}
+    mtext("N groups", side=1, line=2, cex=0.6)
     for (i in 2:length(othermodels)) {
       abline(h=0.5, lty=3, lwd=0.5)
       temp <- read.csv(paste0(year, "/cv_auc_", othermodels[i], "_", nf, "FCV.txt"), header=FALSE)
@@ -114,8 +121,9 @@ for (nf in c(2,3,4,5,6)) {
       points(jitter(temp$V1), jitter(temp$V3, 0.01), pch=19, col=cols[i])
     }
   }
-  legend(7.5, 0.55, extras[2:length(othermodels)], 
+  legend(7.5, 0.55, othermodels[2:length(othermodels)], 
          col=cols[2:length(othermodels)], pch=19, cex=0.65, bg="white")
+  #mtext(3, "(d) base layer harvest + three or more layers")
   dev.off()
 }
 

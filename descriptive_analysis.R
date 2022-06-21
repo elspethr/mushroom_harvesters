@@ -138,13 +138,14 @@ length(unique(c(harvdat$ego_hh[!is.na(harvdat$year)], harvdat$partner_hh[!is.na(
 
 
 #table 2
-kin_coharvs <- clan_coharvs <- dist_coharvs <- sup_coharvs <- numeric()
-kin_sup <- clan_sup <- dist_sup <- sup_sup <- numeric()
-nokinconnect_coharvs <- noconnect_coharvs <- noconnect_sup <- numeric()
-for (year in c("2014", "2015", "2016")) {
+kin_coharvs <- clan_coharvs <- dist_coharvs <- sup_coharvs <- labor_coharvs <- info_coharvs <- social_coharvs <- numeric()
+kin_sup <- clan_sup <- dist_sup <- sup_sup <- labor_sup <- info_sup <- social_sup <- numeric()
+for (year in c("2014", "2015")) {
   net <- get(paste0("harv", year))
-  if (year == 2014) {supnet <- ss2014net}
-  else {supnet <- ss2015net}
+  supnet <- get(paste0("ss", year, "net"))
+  labornet <- get(paste0("ss", year, "labor"))
+  infonet <- get(paste0("ss", year, "info"))
+  socialnet <- get(paste0("ss", year, "social"))
   contractor_index <- which(!is.na(net%v%"contract_id"))
   #co-harvesters
   harvmat <- as.sociomatrix(net)
@@ -152,6 +153,9 @@ for (year in c("2014", "2015", "2016")) {
   clanmat <- as.sociomatrix(clannet)
   distmat <- as.sociomatrix(distnet, attrname="weight")
   supmat <- as.sociomatrix(network(as.sociomatrix(supnet), directed=FALSE))
+  labormat <- as.sociomatrix(network(as.sociomatrix(labornet), directed=FALSE))
+  infomat <- as.sociomatrix(network(as.sociomatrix(infonet), directed=FALSE))
+  socialmat <- as.sociomatrix(network(as.sociomatrix(socialnet), directed=FALSE))
   suptempmat <- !((kinmat + clanmat + supmat)>0)
   tempmat <- !((kinmat + clanmat)>0)
   f <- 0
@@ -163,8 +167,9 @@ for (year in c("2014", "2015", "2016")) {
         clan_coharvs[f] <- clanmat[i,j]
         dist_coharvs[f] <- distmat[i,j]
         sup_coharvs[f] <- supmat[i,j]
-        nokinconnect_coharvs[f] <- tempmat[i,j]
-        noconnect_coharvs[f] <- suptempmat[i,j]
+        labor_coharvs[f] <- labormat[i,j]
+        info_coharvs[f] <- infomat[i,j]
+        social_coharvs[f] <- socialmat[i,j]
       }
     }
   }
@@ -178,7 +183,9 @@ for (year in c("2014", "2015", "2016")) {
           clan_sup[h] <- clanmat[i,j]
           dist_sup[h] <- distmat[i,j]
           sup_sup[h] <- supmat[i,j]
-          noconnect_sup[h] <- tempmat[i,j]
+          labor_sup[h] <- labormat[i,j]
+          info_sup[h] <- infomat[i,j]
+          social_sup[h] <- socialmat[i,j]
         }
       }
     }
@@ -186,6 +193,9 @@ for (year in c("2014", "2015", "2016")) {
   kinmat[lower.tri(kinmat, diag=TRUE)] <- NA
   clanmat[lower.tri(clanmat, diag=TRUE)] <- NA
   distmat[lower.tri(distmat, diag=TRUE)] <- NA
+  labormat[lower.tri(labormat, diag=TRUE)] <- NA
+  infomat[lower.tri(infomat, diag=TRUE)] <- NA
+  socialmat[lower.tri(socialmat, diag=TRUE)] <- NA
   supmat[lower.tri(supmat, diag=TRUE)] <- NA
   harvkinmean <- mean(kin_coharvs) 
   supkinmean <- mean(kin_sup)
@@ -197,26 +207,32 @@ for (year in c("2014", "2015", "2016")) {
   supdistmean <- median(dist_sup)
   distmean <- median(distmat, na.rm=TRUE)
   harvsupprop <- mean(sup_coharvs)
+  harvlaborprop <- mean(labor_coharvs)
+  harvinfoprop <- mean(info_coharvs)
+  harvsocialprop <- mean(social_coharvs)
   supsupprop <- mean(sup_sup)
+  suplaborprop <- mean(labor_sup)
+  supsocialprop <- mean(social_sup)
+  supinfoprop <- mean(info_sup)
   supprop <- mean(supmat, na.rm=TRUE)
-  harvkinnocon <- mean(nokinconnect_coharvs)
-  harvnocon <- mean(noconnect_coharvs)
-  supnocon <- mean(noconnect_sup)
+  laborprop <- mean(labormat, na.rm=TRUE)
+  socialprop <- mean(socialmat, na.rm=TRUE)
+  infoprop <- mean(infomat, na.rm=TRUE)
   print(year)
   #kinship
-  print(paste(round(harvkinmean, 2), round(supkinmean, 2), round(kinmean, 2), 
-        round(OR(harvkinmean, kinmean), 2), round(OR(supkinmean, kinmean), 2)))
+  print(paste(round(harvkinmean, 2), round(supkinmean, 2), round(kinmean, 2)))
   #clan
-  print(paste(round(harvclanprop, 2), round(supclanprop, 2),round(clanprop, 2),
-        round(OR(harvclanprop, clanprop), 2), round(OR(supclanprop, clanprop), 2)))
+  print(paste(round(harvclanprop, 2), round(supclanprop, 2),round(clanprop, 2)))
   #distance
   print(paste(round(harvdistmean, 1), round(supdistmean, 1), round(distmean, 1)))
-              #round(harvdistmean/distmean, 2), round(supdistmean/distmean, 2)))
   #support      
-  print(paste(round(harvsupprop, 2), round(supsupprop, 2), round(supprop, 2),
-        round(OR(harvsupprop, supprop), 2)))
-  #no connect
-  #print(paste(round(harvkinnocon, 2), round(harvnocon, 2), round(supnocon, 2)))
+  print(paste(round(harvsupprop, 2), round(supsupprop, 2), round(supprop, 2)))
+  #labor     
+  print(paste(round(harvlaborprop, 2), round(suplaborprop, 2), round(laborprop, 2)))
+  #social      
+  print(paste(round(harvsocialprop, 2), round(supsocialprop, 2), round(socialprop, 2)))
+  #info      
+  print(paste(round(harvinfoprop, 2), round(supinfoprop, 2), round(infoprop, 2)))
 }
 
 ### data prep for Cate's model ###
@@ -273,8 +289,24 @@ for (year in c(1, 2)) {
       }
     }
   }
-  write.table(supel, paste0("yunnan_networks_", year2, "_harv.dat"),
+  write.table(supel, paste0("yunnan_networks_", year2, ".dat"),
               sep=" ", row.names=FALSE, col.names=FALSE)
+  harv_models_best <- c("kin", "sup", "clan", 
+                        "supdist", "labor", "labordist", 
+                        "socialdist","socialinfolabor")
+  combs <- list(c(7), c(3), c(8), c(3, 9), c(6), c(6, 9), c(4, 9), c(4,5,6))
+  for (i in 1:length(combs)) {
+    item <- combs[[i]]
+    write.table(supel[,c(1,2,item)], 
+                paste0("yunnan_networks_", year2, "_", harv_models_best[i],  ".dat"),
+                sep=" ", row.names=FALSE, col.names=FALSE)
+    write.table(supel[,c(1,2,item,10)], 
+                paste0("yunnan_networks_", year2, "_", harv_models_best[i],  "_harv.dat"),
+                sep=" ", row.names=FALSE, col.names=FALSE)
+    #write.table(supel[,c(1,2,10,item)], 
+    #            paste0("yunnan_networks_", year2, "_", harv_models_best[i],  "_harv_first.dat"),
+    #            sep=" ", row.names=FALSE, col.names=FALSE)
+  }
 }
 
 #check overlap for reviewer
